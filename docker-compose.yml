@@ -1,0 +1,43 @@
+services:
+  web:
+    build: /web
+    command: flask run --debug --host 0.0.0.0
+    volumes:
+      - ./web:/web_app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - kafka
+
+  test_app:
+    build: /test_app
+    stdin_open: true 
+    tty: true
+    volumes:
+      - ./test_app:/test_app
+    network_mode: host
+
+  test_consumer:
+    build: /test_consumer
+    command: python consumer.py
+    volumes:
+      - ./test_consumer:/test_consumer
+    depends_on:
+      - kafka
+          
+  kafka:
+    ports:
+      - '50001:9092'
+    depends_on:
+      - zookeeper
+    image: bitnami/kafka:latest
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_ADVERTISED_HOST_NAME: test_kafka
+
+
+  zookeeper:
+    ports:
+      - '50000:2181'
+    image: zookeeper:3.5.9

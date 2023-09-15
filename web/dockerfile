@@ -1,0 +1,7 @@
+FROM python:3.9
+
+WORKDIR /web_app
+
+COPY . /web_app 
+
+RUN pip install -r ./requirements.txt
